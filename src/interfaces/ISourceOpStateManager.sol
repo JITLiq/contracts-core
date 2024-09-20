@@ -13,20 +13,6 @@ interface ISourceOpStateManager {
         bool registered;
     }
 
-    struct OrderData {
-        bool fulfilled;
-        uint32 expiry;
-        uint256 orderAmount;
-        address destAddress;
-        address operator;
-        FeesData fees;
-    }
-
-    struct FeesData {
-        uint256 operationFee;
-        uint256 bridgeFee;
-    }
-
     /// -- public --
     function baseBridgeToken() external view returns (address);
 
@@ -38,7 +24,7 @@ interface ISourceOpStateManager {
 
     /// -- governance --
     function syncOperator(address operator, OperatorData memory newOperatorData, bool deleteOperator) external;
-
+    function sweep(address token, uint256 amount) external;
     /// -- entrypoint --
     function updateOperatorAllocation(address operator, uint256 holdingAmount, uint256 stakeAmount, bool init)
         external;

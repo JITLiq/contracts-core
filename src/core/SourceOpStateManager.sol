@@ -72,11 +72,17 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
         operatorData[operator] = newOperatorData;
     }
 
+    function sweep(address token, uint256 amount) external {
+        _onlyGov(msg.sender);
+
+        token.safeTransfer(msg.sender, amount);
+    }
+
     function updateOperatorAllocation(address operator, uint256 holdingAmount, uint256 stakeAmount, bool init)
         external
     {
         _onlyEntrypoint(msg.sender);
-        if (operatorData[operator].registered) revert NotRegistered();
+        if (!operatorData[operator].registered) revert NotRegistered();
 
         if (init) {
             operatorData[operator].currentHolding += holdingAmount;
