@@ -19,6 +19,10 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
     event OrderCreated(bytes32 indexed orderId);
     event OrderFulfilled(bytes32 indexed orderId);
 
+    uint256 public constant LP_FEE = 7000;
+    uint256 public constant OPERATOR_FEE = 3000;
+    uint256 public constant MAX_BPS = 10000;
+
     address internal immutable _BASE_BRIDGE_TOKEN;
 
     constructor(address _addressRegistry, address _baseBridgeToken) AddressRegistryService(_addressRegistry) {
@@ -68,14 +72,17 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
         operatorData[operator] = newOperatorData;
     }
 
-    function updateOperatorAllocation(address operator, uint256 amount, bool init) external {
+    function updateOperatorAllocation(address operator, uint256 holdingAmount, uint256 stakeAmount, bool init)
+        external
+    {
         _onlyEntrypoint(msg.sender);
         if (operatorData[operator].registered) revert NotRegistered();
 
         if (init) {
-            operatorData[operator].currentHolding = operatorData[operator].currentHolding + amount;
+            operatorData[operator].currentHolding += holdingAmount;
         } else {
-            operatorData[operator].currentHolding = operatorData[operator].currentHolding - amount;
+            operatorData[operator].currentHolding -= holdingAmount;
+            operatorData[operator].currentStake += stakeAmount;
         }
     }
 
@@ -112,6 +119,20 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
 
         orderData[orderId].fulfilled = true;
         emit OrderFulfilled(orderId);
+    }
+
+    function updatePendingRefunds(FulfillerData[] memory fulfillerData, uint256 lpFees) external {
+        _onlyEntrypoint(msg.sender);
+
+        uint256 fulfillersLength = fulfillerData.length;
+        while (fulfillersLength != 0) {
+            FulfillerData memory _fulfillerData = fulfillerData[fulfillersLength];
+            lpRefundPending[_fulfillerData.fulfiller] += (_fulfillerData.fulfillAmount + lpFees);
+
+            unchecked {
+                fulfillersLength--;
+            }
+        }
     }
 
     function _pullOperatorFunds(uint256 _stakeAmount, address _op) internal {

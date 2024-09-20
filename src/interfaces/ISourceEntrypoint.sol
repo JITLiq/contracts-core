@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "src/core/SourceOpStateManager.sol";
+
 interface ISourceEntrypoint {
-    struct FulfillerData {
-        uint256 fulfillAmount;
-        address fulfiller;
-    }
-
-    function initBridge(bytes32 orderId, uint256 amount, address operator) external;
-
-    function fulfillBridge(
+    function initBridge(
         bytes32 orderId,
-        address destinationAddress,
-        bytes memory signature,
-        FulfillerData[] memory fulfillerData
+        uint256 amount,
+        address destAddress,
+        address operator,
+        uint256 operationFee,
+        uint256 bridgeFee
     ) external;
+
+    function fulfillBridge(bytes32 orderId, SourceOpStateManager.FulfillerData[] memory fulfillerData) external;
 }

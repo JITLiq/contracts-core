@@ -2,6 +2,11 @@
 pragma solidity ^0.8.19;
 
 interface ISourceOpStateManager {
+    struct FulfillerData {
+        uint256 fulfillAmount;
+        address fulfiller;
+    }
+
     struct OperatorData {
         uint256 currentStake;
         uint256 currentHolding;
@@ -35,7 +40,8 @@ interface ISourceOpStateManager {
     function syncOperator(address operator, OperatorData memory newOperatorData, bool deleteOperator) external;
 
     /// -- entrypoint --
-    function updateOperatorAllocation(address operator, uint256 amount, bool init) external;
+    function updateOperatorAllocation(address operator, uint256 holdingAmount, uint256 stakeAmount, bool init)
+        external;
 
     function createOrder(
         bytes32 orderId,
@@ -48,4 +54,6 @@ interface ISourceOpStateManager {
     ) external;
 
     function completeOrder(bytes32 orderId) external;
+
+    function updatePendingRefunds(FulfillerData[] memory fulfillerData, uint256 lpFees) external;
 }
