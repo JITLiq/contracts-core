@@ -7,18 +7,33 @@ import {SourceOpStateManager} from "src/core/SourceOpStateManager.sol";
 
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
-contract SourceEntrypoint is ISourceEntrypoint, AddressRegistryService {
+import {OAppReceiver, Origin} from "layerzero-v2/oapp/contracts/oapp/OAppReceiver.sol";
+import {OAppCore} from "layerzero-v2/oapp/contracts/oapp/OAppCore.sol";
+
+import {Ownable} from "openzeppelin-contracts/access/Ownable.sol";
+
+contract SourceEntrypoint is ISourceEntrypoint, AddressRegistryService, OAppReceiver {
     using SafeTransferLib for address;
 
     error NotRegistered();
     error InsufficientFunds();
     error AlreadyExists();
+    error UnexpectedPeer();
 
     SourceOpStateManager internal immutable _SOURCE_OP_SM;
     address internal immutable _BASE_BRIDGE_TOKEN;
     uint32 internal immutable _ORDER_TTL;
 
-    constructor(address _addressRegistry, uint32 _orderTTL) AddressRegistryService(_addressRegistry) {
+    struct LzReceiveMessage {
+        bytes32 orderId;
+        SourceOpStateManager.FulfillerData[] fulfillerData;
+    }
+
+    constructor(address _addressRegistry, uint32 _orderTTL, address _lzEndpoint)
+        AddressRegistryService(_addressRegistry)
+        OAppCore(_lzEndpoint, msg.sender)
+        Ownable(msg.sender)
+    {
         _SOURCE_OP_SM = SourceOpStateManager(_getAddress(_SOURCE_OP_SM_HASH));
         _BASE_BRIDGE_TOKEN = _SOURCE_OP_SM.baseBridgeToken();
 
@@ -50,7 +65,7 @@ contract SourceEntrypoint is ISourceEntrypoint, AddressRegistryService {
         );
     }
 
-    function fulfillBridge(bytes32 orderId, SourceOpStateManager.FulfillerData[] memory fulfillerData) external {
+    function fulfillBridge(bytes32 orderId, SourceOpStateManager.FulfillerData[] memory fulfillerData) public {
         _SOURCE_OP_SM.completeOrder(orderId);
 
         (,, uint256 orderAmount,, address operator, SourceOpStateManager.FeesData memory fees) =
@@ -62,5 +77,19 @@ contract SourceEntrypoint is ISourceEntrypoint, AddressRegistryService {
 
         uint256 lpFeesPerFulfiller = lpFees / fulfillerData.length;
         _SOURCE_OP_SM.updatePendingRefunds(fulfillerData, lpFeesPerFulfiller);
+    }
+
+    function _lzReceive(Origin calldata _origin, bytes32, bytes calldata message, address, bytes calldata)
+        internal
+        override
+    {
+        address destEntrypoint = _getAddress(_DEST_ENTRYPOINT_HASH);
+        if (address(bytes20(_origin.sender)) != destEntrypoint) {
+            revert UnexpectedPeer();
+        }
+
+        LzReceiveMessage memory lzReceiveMessage = abi.decode(message, (LzReceiveMessage));
+
+        fulfillBridge(lzReceiveMessage.orderId, lzReceiveMessage.fulfillerData);
     }
 }

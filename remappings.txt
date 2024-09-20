@@ -1,3 +1,5 @@
 forge-std/=lib/forge-std/src/
 openzeppelin-contracts/=lib/openzeppelin-contracts/contracts
 solady/=lib/solady/src
+layerzero-v2/=lib/layerzero-v2/packages/layerzero-v2/evm
+@layerzerolabs/lz-evm-protocol-v2=node_modules/@layerzerolabs/lz-evm-protocol-v2
