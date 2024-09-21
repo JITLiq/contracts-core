@@ -16,6 +16,3 @@
 [submodule "lib/multicaller"]
 	path = lib/multicaller
 	url = https://github.com/Vectorized/multicaller
-[submodule "lib/evm-cctp-contracts"]
-	path = lib/evm-cctp-contracts
-	url = https://github.com/circlefin/evm-cctp-contracts
