@@ -24,18 +24,14 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
     uint256 public constant OPERATOR_FEE = 3000;
     uint256 public constant MAX_BPS = 10000;
 
-    address internal immutable _BASE_BRIDGE_TOKEN;
-
-    constructor(address _addressRegistry, address _baseBridgeToken) AddressRegistryService(_addressRegistry) {
-        _BASE_BRIDGE_TOKEN = _baseBridgeToken;
-    }
+    constructor(address _addressRegistry) AddressRegistryService(_addressRegistry) {}
 
     mapping(address => OperatorData) public operatorData;
     mapping(bytes32 => OrderData) public orderData;
     mapping(address => uint256) lpRefundPending;
 
-    function baseBridgeToken() external view returns (address) {
-        return _BASE_BRIDGE_TOKEN;
+    function baseBridgeToken() public view returns (address) {
+        return _getAddress(_BASE_BRIDGE_TOKEN);
     }
 
     function registerOperator(uint256 stakeAmount) external {
@@ -133,7 +129,7 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
 
         uint256 fulfillersLength = fulfillerData.length;
         while (fulfillersLength != 0) {
-            FulfillerData memory _fulfillerData = fulfillerData[fulfillersLength];
+            FulfillerData memory _fulfillerData = fulfillerData[fulfillersLength - 1];
             lpRefundPending[_fulfillerData.fulfiller] += (_fulfillerData.fulfillAmount + lpFees);
 
             unchecked {
@@ -143,7 +139,7 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
     }
 
     function _pullOperatorFunds(uint256 _stakeAmount, address _op) internal {
-        _BASE_BRIDGE_TOKEN.safeTransferFrom(_op, address(this), _stakeAmount);
+        baseBridgeToken().safeTransferFrom(_op, address(this), _stakeAmount);
         OperatorData memory _operatorData = operatorData[_op];
 
         operatorData[_op] =
