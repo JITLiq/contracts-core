@@ -8,8 +8,6 @@ import {ITokenMessenger} from "src/interfaces/external/ITokenMessenger.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {ERC20} from "solady/tokens/ERC20.sol";
 
-import {Multicaller} from "multicaller/Multicaller.sol";
-
 contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
     using SafeTransferLib for address;
 
@@ -97,33 +95,23 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
     function refundLPs(address[] memory lps) external {
         _onlyGov(msg.sender);
         uint256 lpsLength = lps.length;
-        Multicaller multicaller = Multicaller(payable(_getAddress(_MULTICALLER_HASH)));
 
-        address[] memory targets = new address[](lpsLength * 2);
-        bytes[] memory calldatas = new bytes[](lpsLength * 2);
-        uint256[] memory values = new uint256[](lpsLength * 2);
-
-        uint256 multicallIdx = 0;
         address _baseBridgeToken = baseBridgeToken();
         while (lpsLength != 0) {
             address lp = lps[lpsLength - 1];
             uint256 pendingLpRefund = lpRefundPending[lp];
 
-            targets[multicallIdx] = _baseBridgeToken;
-            calldatas[multicallIdx] = abi.encodeCall(ERC20.approve, (CCTP_TOKEN_MESSENGER, pendingLpRefund));
-
-            targets[++multicallIdx] = CCTP_TOKEN_MESSENGER;
-            calldatas[multicallIdx++] = abi.encodeCall(
-                ITokenMessenger.depositForBurn,
-                (pendingLpRefund, DEST_CHAIN_CCTP_DOMAIN, bytes32(abi.encode(lp)), _baseBridgeToken)
+            ERC20(_baseBridgeToken).approve(CCTP_TOKEN_MESSENGER, pendingLpRefund);
+            ITokenMessenger(CCTP_TOKEN_MESSENGER).depositForBurn(
+                pendingLpRefund, DEST_CHAIN_CCTP_DOMAIN, bytes32(abi.encode(lp)), _baseBridgeToken
             );
+
+            lpRefundPending[lp] = 0;
 
             unchecked {
                 lpsLength--;
             }
         }
-
-        multicaller.aggregate(targets, calldatas, values, addressRegistry.owner());
     }
 
     function updateOperatorAllocation(address operator, uint256 holdingAmount, uint256 stakeAmount, bool init)
