@@ -60,17 +60,8 @@ contract SourceEntrypoint is ISourceEntrypoint, IEntity, AddressRegistryService,
     }
 
     function fulfillBridge(bytes32 orderId, FulfillerData[] memory fulfillerData) public {
-        (SourceOpStateManager sourceOpSM,) = _getStateManager();
-        sourceOpSM.completeOrder(orderId);
-
-        (,, uint256 orderAmount,, address operator, FeesData memory fees) = sourceOpSM.orderData(orderId);
-        uint256 operatorFees = (fees.operationFee * sourceOpSM.OPERATOR_FEE()) / sourceOpSM.MAX_BPS();
-        uint256 lpFees = (fees.operationFee * sourceOpSM.LP_FEE()) / sourceOpSM.MAX_BPS();
-
-        sourceOpSM.updateOperatorAllocation(operator, orderAmount, operatorFees, false);
-
-        uint256 lpFeesPerFulfiller = lpFees / fulfillerData.length;
-        sourceOpSM.updatePendingRefunds(fulfillerData, lpFeesPerFulfiller);
+        _onlyGov(msg.sender);
+        _fulfillBridge(orderId, fulfillerData);
     }
 
     function _lzReceive(Origin calldata _origin, bytes32, bytes calldata message, address, bytes calldata)
@@ -84,11 +75,25 @@ contract SourceEntrypoint is ISourceEntrypoint, IEntity, AddressRegistryService,
 
         LzReceiveMessage memory lzReceiveMessage = abi.decode(message, (LzReceiveMessage));
 
-        fulfillBridge(lzReceiveMessage.orderId, lzReceiveMessage.fulfillerData);
+        _fulfillBridge(lzReceiveMessage.orderId, lzReceiveMessage.fulfillerData);
     }
 
     function _getStateManager() internal view returns (SourceOpStateManager, address) {
         SourceOpStateManager sourceOpSM = SourceOpStateManager(_getAddress(_SOURCE_OP_SM_HASH));
         return (sourceOpSM, sourceOpSM.baseBridgeToken());
+    }
+
+    function _fulfillBridge(bytes32 orderId, FulfillerData[] memory fulfillerData) internal {
+        (SourceOpStateManager sourceOpSM,) = _getStateManager();
+        sourceOpSM.completeOrder(orderId);
+
+        (,, uint256 orderAmount,, address operator, FeesData memory fees) = sourceOpSM.orderData(orderId);
+        uint256 operatorFees = (fees.operationFee * sourceOpSM.OPERATOR_FEE()) / sourceOpSM.MAX_BPS();
+        uint256 lpFees = (fees.operationFee * sourceOpSM.LP_FEE()) / sourceOpSM.MAX_BPS();
+
+        sourceOpSM.updateOperatorAllocation(operator, orderAmount, operatorFees, false);
+
+        uint256 lpFeesPerFulfiller = lpFees / fulfillerData.length;
+        sourceOpSM.updatePendingRefunds(fulfillerData, lpFeesPerFulfiller);
     }
 }
