@@ -37,7 +37,9 @@
         ]
     },
     "dependencies": {
+        "@layerzerolabs/lz-evm-messagelib-v2": "^2.3.42",
         "@layerzerolabs/lz-evm-protocol-v2": "^2.3.42",
-        "@layerzerolabs/oapp-evm": "^0.0.4"
+        "@layerzerolabs/oapp-evm": "^0.0.4",
+        "solidity-bytes-utils": "^0.8.2"
     }
 }
