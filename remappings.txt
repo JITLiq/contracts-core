@@ -5,3 +5,4 @@ layerzero-v2/=lib/layerzero-v2/packages/layerzero-v2/evm
 @layerzerolabs/lz-evm-protocol-v2=node_modules/@layerzerolabs/lz-evm-protocol-v2
 @layerzerolabs/lz-evm-messagelib-v2=node_modules/@layerzerolabs/lz-evm-messagelib-v2
 solidity-bytes-utils/=node_modules/solidity-bytes-utils
+multicaller/=lib/multicaller/src

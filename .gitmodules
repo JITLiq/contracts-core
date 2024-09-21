@@ -13,3 +13,9 @@
 [submodule "lib/layerzero-v2"]
 	path = lib/layerzero-v2
 	url = https://github.com/LayerZero-Labs/layerzero-v2
+[submodule "lib/multicaller"]
+	path = lib/multicaller
+	url = https://github.com/Vectorized/multicaller
+[submodule "lib/evm-cctp-contracts"]
+	path = lib/evm-cctp-contracts
+	url = https://github.com/circlefin/evm-cctp-contracts

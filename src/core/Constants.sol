@@ -13,5 +13,8 @@ abstract contract Constants {
 
     /// -- ADAPTERS --
     bytes32 internal constant _BASE_WITHDRAWAL_ADAPTER_HASH =
-        bytes32(uint256(keccak256("jitliq.core.baseWithdrawalAdapter")) - 1);
+        bytes32(uint256(keccak256("jitliq.adapter.baseWithdrawalAdapter")) - 1);
+
+    /// -- EXTERNAL --
+    bytes32 internal constant _MULTICALLER_HASH = bytes32(uint256(keccak256("jitliq.ext.multicaller")) - 1);
 }
