@@ -26,7 +26,7 @@ contract DestEntrypoint is IDestEntrypoint, AddressRegistryService, OAppSender {
 
     uint32 public immutable SOURCE_CHAIN_EID;
 
-    bytes internal _lzOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(50000, 0);
+    bytes internal _lzOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(3000000, 0);
 
     constructor(address _addressRegistry, address _lzEndpoint, uint32 _sourceChainEid)
         AddressRegistryService(_addressRegistry)
