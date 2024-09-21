@@ -14,6 +14,7 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
     error NotRegistered();
     error InsufficientFunds();
     error OnlyEntrypoint();
+    error TransferFailed();
 
     event OperatorStaked(address indexed operator, uint256 stakeAmount);
     event WithdrawalInitiated(address indexed operator, uint256 withdrawAmount);
@@ -71,6 +72,13 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
 
     function sweep(address token, uint256 amount) external {
         _onlyGov(msg.sender);
+
+        if (token == address(0)) {
+            (bool succ,) = msg.sender.call{value: amount}("");
+            if (!succ) revert TransferFailed();
+
+            return;
+        }
 
         token.safeTransfer(msg.sender, amount);
     }

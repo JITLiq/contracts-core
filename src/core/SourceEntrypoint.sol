@@ -78,7 +78,7 @@ contract SourceEntrypoint is ISourceEntrypoint, IEntity, AddressRegistryService,
         override
     {
         address destEntrypoint = _getAddress(_DEST_ENTRYPOINT_HASH);
-        if (address(bytes20(_origin.sender)) != destEntrypoint) {
+        if (_origin.sender != bytes32(abi.encode(destEntrypoint))) {
             revert UnexpectedPeer();
         }
 

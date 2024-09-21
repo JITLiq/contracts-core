@@ -20,6 +20,7 @@ contract DestEntrypoint is IDestEntrypoint, AddressRegistryService, OAppSender {
     using ECDSA for bytes32;
 
     error InvalidSignatures();
+    error TransferFailed();
 
     event FulfilledOrder(bytes32 indexed orderId);
 
@@ -40,7 +41,7 @@ contract DestEntrypoint is IDestEntrypoint, AddressRegistryService, OAppSender {
         OrderData memory orderData,
         FulfillerData[] memory fulfillerData,
         bytes[] memory operatorSignatures
-    ) external {
+    ) external payable {
         (DestOpStateManager _destOpSM, address _baseBridgeToken) = _getStateManager();
 
         uint256 operatorsLength = operatorSignatures.length;
@@ -92,4 +93,19 @@ contract DestEntrypoint is IDestEntrypoint, AddressRegistryService, OAppSender {
         DestOpStateManager destOpSM = DestOpStateManager(_getAddress(_DEST_OP_SM_HASH));
         return (destOpSM, destOpSM.baseBridgeToken());
     }
+
+    function sweep(address token, uint256 amount) external {
+        _onlyGov(msg.sender);
+
+        if (token == address(0)) {
+            (bool succ,) = msg.sender.call{value: amount}("");
+            if (!succ) revert TransferFailed();
+
+            return;
+        }
+
+        token.safeTransfer(msg.sender, amount);
+    }
+
+    receive() external payable {}
 }

@@ -9,5 +9,7 @@ interface IDestEntrypoint is IEntity {
         OrderData memory orderData,
         FulfillerData[] memory fulfillerData,
         bytes[] memory operatorSignatures
-    ) external;
+    ) external payable;
+
+    function sweep(address token, uint256 amount) external;
 }
