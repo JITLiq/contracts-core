@@ -28,7 +28,8 @@ contract Deploy is Script, Constants {
         SourceEntrypoint se = new SourceEntrypoint(
             address(ar),
             100,
-            0x1a44076050125825900e736c501f859c50fE728c
+            0x1a44076050125825900e736c501f859c50fE728c,
+            30184 /// base eid
         );
         ar.setAddress(_SOURCE_ENTRYPOINT_HASH, address(se));
         vm.stopBroadcast();
