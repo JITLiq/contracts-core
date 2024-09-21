@@ -5,8 +5,10 @@ import {IDestOpStateManager} from "src/interfaces/IDestOpStateManager.sol";
 import {AddressRegistryService} from "src/core/AddressRegistryService.sol";
 
 contract DestOpStateManager is IDestOpStateManager, AddressRegistryService {
+    error OnlyEntrypoint();
+
     address[] public operators;
-    uint256 public totalFundsOnHold;
+    uint256 public totalStakedFunds;
 
     constructor(address _addressRegistry) AddressRegistryService(_addressRegistry) {}
 
@@ -14,8 +16,26 @@ contract DestOpStateManager is IDestOpStateManager, AddressRegistryService {
         return _getAddress(_BASE_BRIDGE_TOKEN_HASH);
     }
 
-    function syncSourceData(address[] memory newOperators, uint256 newTotalFundsOnHold) external {
+    function getOperators() external view returns (address[] memory) {
+        return operators;
+    }
+
+    function syncSourceData(address[] memory newOperators, uint256 newTotalStakedFunds) external {
+        _onlyGov(msg.sender);
+
         operators = newOperators;
-        totalFundsOnHold = newTotalFundsOnHold;
+        totalStakedFunds = newTotalStakedFunds;
+    }
+
+    function deductStakedFunds(uint256 amountDeduct) external {
+        _onlyEntrypoint(msg.sender);
+
+        totalStakedFunds -= amountDeduct;
+    }
+
+    function _onlyEntrypoint(address _addr) internal view {
+        if (_addr != _getAddress(_DEST_ENTRYPOINT_HASH)) {
+            revert OnlyEntrypoint();
+        }
     }
 }
