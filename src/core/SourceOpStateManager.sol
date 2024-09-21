@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import {ISourceOpStateManager} from "src/interfaces/ISourceOpStateManager.sol";
 import {AddressRegistryService} from "src/core/AddressRegistryService.sol";
-import {ITokenMessenger} from "src/interfaces/external/TokenMessenger.sol";
+import {ITokenMessenger} from "src/interfaces/external/ITokenMessenger.sol";
 
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {ERC20} from "solady/tokens/ERC20.sol";
@@ -40,7 +40,7 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
 
     mapping(address => OperatorData) public operatorData;
     mapping(bytes32 => OrderData) public orderData;
-    mapping(address => uint256) lpRefundPending;
+    mapping(address => uint256) public lpRefundPending;
 
     function baseBridgeToken() public view returns (address) {
         return _getAddress(_BASE_BRIDGE_TOKEN_HASH);
