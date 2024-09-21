@@ -26,4 +26,9 @@ interface IEntity {
         uint256 currentHolding;
         bool registered;
     }
+
+    struct LzReceiveMessage {
+        bytes32 orderId;
+        FulfillerData[] fulfillerData;
+    }
 }

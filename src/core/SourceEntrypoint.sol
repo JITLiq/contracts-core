@@ -22,18 +22,15 @@ contract SourceEntrypoint is ISourceEntrypoint, IEntity, AddressRegistryService,
     error UnexpectedPeer();
 
     uint32 internal immutable _ORDER_TTL;
+    uint32 public immutable DEST_CHAIN_EID;
 
-    struct LzReceiveMessage {
-        bytes32 orderId;
-        SourceOpStateManager.FulfillerData[] fulfillerData;
-    }
-
-    constructor(address _addressRegistry, uint32 _orderTTL, address _lzEndpoint)
+    constructor(address _addressRegistry, uint32 _orderTTL, address _lzEndpoint, uint32 _destChainEid)
         AddressRegistryService(_addressRegistry)
         OAppCore(_lzEndpoint, msg.sender)
         Ownable(msg.sender)
     {
         _ORDER_TTL = _orderTTL;
+        DEST_CHAIN_EID = _destChainEid;
     }
 
     function initBridge(
@@ -62,7 +59,7 @@ contract SourceEntrypoint is ISourceEntrypoint, IEntity, AddressRegistryService,
         );
     }
 
-    function fulfillBridge(bytes32 orderId, SourceOpStateManager.FulfillerData[] memory fulfillerData) public {
+    function fulfillBridge(bytes32 orderId, FulfillerData[] memory fulfillerData) public {
         (SourceOpStateManager sourceOpSM,) = _getStateManager();
         sourceOpSM.completeOrder(orderId);
 
