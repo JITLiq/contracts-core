@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {ISourceEntrypoint} from "src/interfaces/ISourceEntrypoint.sol";
+import {IEntity} from "src/interfaces/IEntity.sol";
 import {AddressRegistryService} from "src/core/AddressRegistryService.sol";
 import {SourceOpStateManager} from "src/core/SourceOpStateManager.sol";
 
@@ -12,7 +13,7 @@ import {OAppCore} from "layerzero-v2/oapp/contracts/oapp/OAppCore.sol";
 
 import {Ownable} from "openzeppelin-contracts/access/Ownable.sol";
 
-contract SourceEntrypoint is ISourceEntrypoint, AddressRegistryService, OAppReceiver {
+contract SourceEntrypoint is ISourceEntrypoint, IEntity, AddressRegistryService, OAppReceiver {
     using SafeTransferLib for address;
 
     error NotRegistered();
@@ -65,8 +66,7 @@ contract SourceEntrypoint is ISourceEntrypoint, AddressRegistryService, OAppRece
         (SourceOpStateManager sourceOpSM,) = _getStateManager();
         sourceOpSM.completeOrder(orderId);
 
-        (,, uint256 orderAmount,, address operator, SourceOpStateManager.FeesData memory fees) =
-            sourceOpSM.orderData(orderId);
+        (,, uint256 orderAmount,, address operator, FeesData memory fees) = sourceOpSM.orderData(orderId);
         uint256 operatorFees = (fees.operationFee * sourceOpSM.OPERATOR_FEE()) / sourceOpSM.MAX_BPS();
         uint256 lpFees = (fees.operationFee * sourceOpSM.LP_FEE()) / sourceOpSM.MAX_BPS();
 

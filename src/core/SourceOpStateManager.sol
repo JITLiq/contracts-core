@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {ISourceOpStateManager} from "src/interfaces/ISourceOpStateManager.sol";
+import {IEntity} from "src/interfaces/IEntity.sol";
 import {AddressRegistryService} from "src/core/AddressRegistryService.sol";
 
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";

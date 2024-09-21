@@ -1,18 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-interface ISourceOpStateManager {
-    struct FulfillerData {
-        uint256 fulfillAmount;
-        address fulfiller;
-    }
+import {IEntity} from "src/interfaces/IEntity.sol";
 
-    struct OperatorData {
-        uint256 currentStake;
-        uint256 currentHolding;
-        bool registered;
-    }
-
+interface ISourceOpStateManager is IEntity {
     /// -- public --
     function baseBridgeToken() external view returns (address);
 
