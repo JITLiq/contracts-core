@@ -11,7 +11,7 @@ contract DestOpStateManager is IDestOpStateManager, AddressRegistryService {
     constructor(address _addressRegistry) AddressRegistryService(_addressRegistry) {}
 
     function baseBridgeToken() external view returns (address) {
-        return _getAddress(_BASE_BRIDGE_TOKEN);
+        return _getAddress(_BASE_BRIDGE_TOKEN_HASH);
     }
 
     function syncSourceData(address[] memory newOperators, uint256 newTotalFundsOnHold) external {

@@ -31,7 +31,7 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
     mapping(address => uint256) lpRefundPending;
 
     function baseBridgeToken() public view returns (address) {
-        return _getAddress(_BASE_BRIDGE_TOKEN);
+        return _getAddress(_BASE_BRIDGE_TOKEN_HASH);
     }
 
     function registerOperator(uint256 stakeAmount) external {
