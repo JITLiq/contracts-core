@@ -14,15 +14,16 @@ contract DeploySource is Script, Constants {
         AddressRegistry ar = new AddressRegistry(
             0xE177DdEa55d5A724515AF1D909a36543cBC4d93E
         );
-        ar.setAddress(
-            _BASE_BRIDGE_TOKEN_HASH,
-            0xaf88d065e77c8cC2239327C5EDb3A432268e5831
-        );
+        ar.setAddress(_BASE_BRIDGE_TOKEN_HASH, 0xaf88d065e77c8cC2239327C5EDb3A432268e5831);
         // AddressRegistry ar = AddressRegistry(
         //     0x1a9d99B3e5Df870f823d00bCA728a466deC089b6
         // );
 
-        SourceOpStateManager sosm = new SourceOpStateManager(address(ar));
+        SourceOpStateManager sosm = new SourceOpStateManager(
+            address(ar),
+            6, // base cctp domain
+            0x19330d10D9Cc8751218eaf51E8885D058642E08A // arb token messenger
+        );
         // SourceOpStateManager sosm = SourceOpStateManager(
         //     0x2bCFbC4Dd2Af9Af0458c9aD179A7A5791b0A9502
         // );
