@@ -14,10 +14,7 @@ contract DeployDest is Script, Constants {
         AddressRegistry ar = new AddressRegistry(
             0xE177DdEa55d5A724515AF1D909a36543cBC4d93E
         );
-        ar.setAddress(
-            _BASE_BRIDGE_TOKEN_HASH,
-            0xaf88d065e77c8cC2239327C5EDb3A432268e5831
-        );
+        ar.setAddress(_BASE_BRIDGE_TOKEN_HASH, 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
         // AddressRegistry ar = AddressRegistry(
         //     0x1a9d99B3e5Df870f823d00bCA728a466deC089b6
         // );

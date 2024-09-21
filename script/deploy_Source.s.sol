@@ -15,9 +15,9 @@ contract DeploySource is Script, Constants {
             0xE177DdEa55d5A724515AF1D909a36543cBC4d93E
         );
         ar.setAddress(_BASE_BRIDGE_TOKEN_HASH, 0xaf88d065e77c8cC2239327C5EDb3A432268e5831);
-        ar.setAddress(_MULTICALLER_HASH, 0x0000000000002Bdbf1Bf3279983603Ec279CC6dF);
+        ar.setAddress(_MULTICALLER_HASH, 0x00000000002Fd5Aeb385D324B580FCa7c83823A0);
         // AddressRegistry ar = AddressRegistry(
-        //     0x1a9d99B3e5Df870f823d00bCA728a466deC089b6
+        //     0x53D2A5e9a88A716954A6fc8fF4fF5e35995BDF09
         // );
 
         SourceOpStateManager sosm = new SourceOpStateManager(
