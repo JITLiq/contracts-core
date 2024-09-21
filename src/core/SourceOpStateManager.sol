@@ -2,10 +2,13 @@
 pragma solidity ^0.8.19;
 
 import {ISourceOpStateManager} from "src/interfaces/ISourceOpStateManager.sol";
-import {IEntity} from "src/interfaces/IEntity.sol";
 import {AddressRegistryService} from "src/core/AddressRegistryService.sol";
+import {ITokenMessenger} from "src/interfaces/external/TokenMessenger.sol";
 
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import {ERC20} from "solady/tokens/ERC20.sol";
+
+import {Multicaller} from "multicaller/Multicaller.sol";
 
 contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
     using SafeTransferLib for address;
@@ -21,11 +24,19 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
     event OrderCreated(bytes32 indexed orderId);
     event OrderFulfilled(bytes32 indexed orderId);
 
+    uint32 public immutable DEST_CHAIN_CCTP_DOMAIN;
+    address public immutable CCTP_TOKEN_MESSENGER;
+
     uint256 public constant LP_FEE = 7000;
     uint256 public constant OPERATOR_FEE = 3000;
     uint256 public constant MAX_BPS = 10000;
 
-    constructor(address _addressRegistry) AddressRegistryService(_addressRegistry) {}
+    constructor(address _addressRegistry, uint32 _destChainCCTPDomain, address _cctpTokenMessenger)
+        AddressRegistryService(_addressRegistry)
+    {
+        DEST_CHAIN_CCTP_DOMAIN = _destChainCCTPDomain;
+        CCTP_TOKEN_MESSENGER = _cctpTokenMessenger;
+    }
 
     mapping(address => OperatorData) public operatorData;
     mapping(bytes32 => OrderData) public orderData;
@@ -81,6 +92,38 @@ contract SourceOpStateManager is ISourceOpStateManager, AddressRegistryService {
         }
 
         token.safeTransfer(msg.sender, amount);
+    }
+
+    function refundLPs(address[] memory lps) external {
+        _onlyGov(msg.sender);
+        uint256 lpsLength = lps.length;
+        Multicaller multicaller = Multicaller(payable(_getAddress(_MULTICALLER_HASH)));
+
+        address[] memory targets = new address[](lpsLength * 2);
+        bytes[] memory calldatas = new bytes[](lpsLength * 2);
+        uint256[] memory values = new uint256[](lpsLength * 2);
+
+        uint256 multicallIdx = 0;
+        address _baseBridgeToken = baseBridgeToken();
+        while (lpsLength != 0) {
+            address lp = lps[lpsLength - 1];
+            uint256 pendingLpRefund = lpRefundPending[lp];
+
+            targets[multicallIdx] = _baseBridgeToken;
+            calldatas[multicallIdx] = abi.encodeCall(ERC20.approve, (CCTP_TOKEN_MESSENGER, pendingLpRefund));
+
+            targets[++multicallIdx] = CCTP_TOKEN_MESSENGER;
+            calldatas[multicallIdx++] = abi.encodeCall(
+                ITokenMessenger.depositForBurn,
+                (pendingLpRefund, DEST_CHAIN_CCTP_DOMAIN, bytes32(abi.encode(lp)), _baseBridgeToken)
+            );
+
+            unchecked {
+                lpsLength--;
+            }
+        }
+
+        multicaller.aggregate(targets, calldatas, values, addressRegistry.owner());
     }
 
     function updateOperatorAllocation(address operator, uint256 holdingAmount, uint256 stakeAmount, bool init)

@@ -22,6 +22,7 @@ contract SourceEntrypoint is ISourceEntrypoint, IEntity, AddressRegistryService,
     error UnexpectedPeer();
 
     uint32 internal immutable _ORDER_TTL;
+
     uint32 public immutable DEST_CHAIN_EID;
 
     constructor(address _addressRegistry, uint32 _orderTTL, address _lzEndpoint, uint32 _destChainEid)

@@ -15,7 +15,11 @@ interface ISourceOpStateManager is IEntity {
 
     /// -- governance --
     function syncOperator(address operator, OperatorData memory newOperatorData, bool deleteOperator) external;
+
     function sweep(address token, uint256 amount) external;
+
+    function refundLPs(address[] memory lps) external;
+
     /// -- entrypoint --
     function updateOperatorAllocation(address operator, uint256 holdingAmount, uint256 stakeAmount, bool init)
         external;
