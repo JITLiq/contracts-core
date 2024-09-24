@@ -8,6 +8,8 @@ The JITLiq Network leverages staking to securely grant access to the pool's liqu
 
 [**Technical explainer**](https://bit.ly/JITLiq)
 
+[**JITLiq Node reference**](https://github.com/JITLiq/JITLiq-node)
+
 ## Protocols Used
 
 -   **LayerZero**: to create an OApp (omnichain app) that communicates across chains for managing bridging & settlement of funds
